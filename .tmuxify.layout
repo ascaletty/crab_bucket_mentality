@@ -1,0 +1,5 @@
+main 1* nvim src/main.rs
+paths 1 nvim src/program_paths.rs
+git 1 cargo build
+
+
