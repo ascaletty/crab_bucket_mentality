@@ -1,11 +1,7 @@
-
-use gtk::{
-    Application, ApplicationWindow, Button, ListBox, PolicyType, ScrolledWindow, TextView, glib,
-};
+use gtk::{Application, Button, ListBox, PolicyType, ScrolledWindow, TextView, glib};
 use gtk::{Window, prelude::*};
 const APP_ID: &str = "org.gtk_rs.HelloWorld2";
-use std::collections::HashMap;
-use std::os::unix::process::CommandExt;
+use std::path::Path;
 use std::process::Command;
 #[path = "program_paths.rs"]
 mod path;
@@ -20,24 +16,30 @@ fn main() -> glib::ExitCode {
     app.run()
 }
 
-fn build_ui(app: &Application) { 
+fn build_ui(app: &Application) {
+    let cache_dir = Path::new("/home/ascaletty23/.cache/crab_bucket_mentality.cache");
+
+    let temp_dir = Path::new("/home/ascaletty23/.cache/crab_bucket_mentality1.cache");
     let mut programs_vec: Vec<path::ProgramData> = Vec::new();
-    programs_vec=path::parse_programs(programs_vec).expect("failed to parse program");
+    programs_vec = path::parse_programs(programs_vec).expect("failed to parse program");
     let program_list = ListBox::new();
     for program_data in programs_vec {
         let label = Button::with_label(program_data.name.as_str());
-        if program_data.terminal == true{
-         label.connect_clicked(move |label| {
-            let mut temp = Command::new("kitty");
-            let mut cmd= temp.args([program_data.exec.as_str()]);
-            cmd.exec();
-         });
-        }
-        else{
-        label.connect_clicked(move |label| {
-            let mut cmd = Command::new(program_data.exec.as_str());
-            cmd.exec();
-        });
+        if program_data.terminal {
+            label.connect_clicked(move |_label| {
+                let mut temp = Command::new("kitty");
+                let cmd = temp.args([program_data.exec.as_str()]);
+                path::edit_cache(&program_data.name, cache_dir, temp_dir)
+                    .expect("failed edit cache");
+                cmd.spawn().expect("failed execution");
+            });
+        } else {
+            label.connect_clicked(move |label| {
+                let mut cmd = Command::new(program_data.exec.as_str());
+                path::edit_cache(&program_data.name, cache_dir, temp_dir)
+                    .expect("failed edit cache");
+                cmd.spawn().expect("failed exec");
+            });
         }
         program_list.append(&label);
     }
@@ -68,4 +70,3 @@ fn build_ui(app: &Application) {
     // Present window
     window.present();
 }
-
