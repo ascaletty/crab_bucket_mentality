@@ -1,0 +1,19 @@
+listBox.program_list {
+  background: yellow;
+}
+label {
+  color: red;
+}
+button {
+  background: blue;
+  border-radius: 200px;
+}
+searchEntry.text_input {
+  background: green;
+}
+window {
+  border-radius: 20px;
+}
+text {
+  color: cyan;
+}
