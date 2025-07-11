@@ -6,9 +6,16 @@ edition = "2024"
 [dependencies]
 csv = "1.3.1"
 freedesktop_entry_parser = "1.3.0"
-masonry = "0.3.0"
 regex = "1.11.1"
 serde = {version= "1.0.219", features= ["derive"] }
 toml = "0.8.23"
 winit = "0.30.11"
-xilem = "0.3.0"
+# Core library
+relm4 = "0.9"
+# Optional: reusable components
+relm4-components = "0.9"
+# Optional: icons (more info at https://github.com/Relm4/icons)
+relm4-icons = "0.9.0"
+relm4-macros = "0.9.1"
+gtk4-layer-shell = "0.5.0"
+hyprland = "0.4.0-beta.1"

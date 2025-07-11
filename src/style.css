@@ -1,19 +1,29 @@
-listBox.program_list {
-  background: yellow;
+text {}
+
+@font-face {
+  font-family: Hack;
+  src: "/usr/share/fonts/TTF/Hack-Regular.ttf"
 }
+
 label {
-  color: red;
+  background: #154c79;
+  border-radius: 20px;
+  opacity: 70%;
+  font-family: Hack;
 }
-button {
-  background: blue;
-  border-radius: 200px;
+
+box {
+  background: #cc5500;
+  border-radius: 20px;
+  opacity: 70%;
+  ;
 }
-searchEntry.text_input {
-  background: green;
-}
+
 window {
   border-radius: 20px;
+  background: transparent;
 }
-text {
-  color: cyan;
+
+box.main_box {
+  background: transparent;
 }
