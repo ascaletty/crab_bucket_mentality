@@ -1,4 +1,4 @@
 git 1 
-paths 1* nvim src/program_paths.rs
+paths 1* nvim src/main.rs
 
 

@@ -356,6 +356,7 @@ dependencies = [
  "relm4-icons",
  "relm4-macros",
  "serde",
+ "tokio",
  "toml",
  "winit",
 ]

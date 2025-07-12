@@ -1,33 +1,16 @@
-use freedesktop_entry_parser::Entry;
 use gtk::prelude::*;
+
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
-use relm4::factory::FactoryVecDeque;
-use relm4::gtk::builders::TextMarkBuilder;
-use relm4::gtk::cairo::ffi::cairo_set_font_face;
-use relm4::gtk::ffi::{
-    GtkTreeIter, gtk_list_store_append, gtk_list_store_insert, gtk_list_store_new,
-    gtk_tree_model_get_iter,
-};
-use relm4::gtk::gdk::Cursor;
-use relm4::gtk::glib::gobject_ffi::G_TYPE_STRING;
-use relm4::gtk::glib::property::PropertyGet;
-use relm4::gtk::glib::{GString, SignalHandlerId};
-use relm4::gtk::subclass::{text_buffer, tree_model_filter, window};
-use relm4::gtk::{
-    CellRenderer, CellRendererText, EntryCompletion, InputHints, TreeModel, TreeViewColumn,
-};
-use relm4::{prelude::*, set_global_css, set_global_css_from_file};
-use relm4_icons::icon_names;
-use serde::de::IntoDeserializer;
-use std::io::IsTerminal;
-use std::os::unix::process::CommandExt;
+use hyprland::data::*;
+use hyprland::prelude::*;
+use relm4::Worker;
+use relm4::WorkerController;
+use relm4::{prelude::*, set_global_css_from_file};
+use std::convert::identity;
 use std::process::Command;
 
-use crate::hyprland::check_workspace_update;
-use crate::path::ProgramData;
-
-mod hyprland;
-#[path = "program_paths.rs"]
+use crate::path::Hypr;
+#[path = "workspaces.rs"]
 mod path;
 #[derive(Debug)]
 enum AppMsg {
@@ -37,6 +20,7 @@ enum AppMsg {
 struct AppData {
     current_string: gtk::EntryBuffer,
     terminal: bool,
+    worker: WorkerController<path::Hypr>,
 }
 struct AppWidgets {
     text_input: gtk::Text,
@@ -91,6 +75,12 @@ impl SimpleComponent for AppData {
         let mut model = AppData {
             current_string: launcher.current_string,
             terminal: launcher.terminal,
+            worker: Hypr::builder()
+                .detach_worker(Hypr {
+                    currentWorkspace: Client::get_active().unwrap().unwrap().workspace.id,
+                    activeWorkspaces: Workspaces::get().unwrap().to_vec(),
+                })
+                .forward(sender.input_sender(), identity),
         };
         let vbox = gtk::Box::builder()
             .orientation(gtk::Orientation::Horizontal)
@@ -119,15 +109,6 @@ impl SimpleComponent for AppData {
             .width_request(75)
             .build();
 
-        let completion_model = gtk::ListStore::new(&[relm4::gtk::glib::Type::STRING]);
-
-        let mut program_data_vec = Vec::new();
-        program_data_vec =
-            path::parse_programs(program_data_vec).expect("failed to parse_programs");
-        for program_data in program_data_vec {
-            let row = completion_model.append();
-            completion_model.set_value(&row, 0, &program_data.name.to_value());
-        }
         let text_input = gtk::Text::builder()
             .buffer(&model.current_string)
             .halign(gtk::Align::Center)
@@ -142,7 +123,6 @@ impl SimpleComponent for AppData {
             print!("enter hit");
             sender.input(AppMsg::Enter);
         });
-
         let widgets = AppWidgets { text_input };
         ComponentParts { model, widgets }
     }
@@ -160,10 +140,10 @@ impl SimpleComponent for AppData {
 }
 
 fn main() {
-    let app = RelmApp::new("relm4.test.simple_manual");
-    check_workspace_update().unwrap();
+    let app = RelmApp::new("relm4.bar.app");
     app.run::<AppData>(AppData {
         current_string: gtk::EntryBuffer::builder().build(),
         terminal: false,
+        worker: path::Hypr::init(),
     });
 }
